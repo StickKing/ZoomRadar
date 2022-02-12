@@ -51,62 +51,40 @@ class ZoomUser(Zoom):
             return self.ZoomGET.json()['meetings']
 
     #Метод создания новой конференции(Create conference function)
-    def SetConference(self, topic, type, start_time, duration, timezone = ''):
+    def SetConference(self, topic, type, start_time, duration, participant_video,  auto_recording = 'none', timezone = ''):
+
         if timezone == '':
-            timezone = self.timezone
-
-        meetingdetails = {"topic": "The title of your zoom meeting",
-                          "type": 2,
-                          "start_time": "2022-02-14T10:21:57",
-                          "duration": "45",
-                          #'schedule_for': self.id,
-                          "timezone": "Europe/Madrid",
-                          'default_password': 'true',
-
-                          "settings": {"host_video": "true",
-                                       "participant_video": "true",
-                                       "join_before_host": "False",
-                                       "mute_upon_entry": "False",
-                                       "auto_recording": "local"
-                                       }
-                          }
-
-        sett = {
-            'host_video': False,
-            'participant_video': True,
-            'join_before_host': True,
-            'jbh_time': 0,
-            'auto_recording': 'local',
-            'waiting_room': False,
-            'registrants_confirmation_email': False,
-            'authentication_option': False
-        }
+            timezone = str(self.timezone)
 
         return requests.post(self.url_name, headers=self.key,
 
-                params={ 'userId': self.id },
+                params={ 'userId': str(self.id) },
 
-                data=json.dumps(meetingdetails)
+                json={
+                    'topic': str(topic),
+                    'type': type,
+                    'start_time': str(start_time),
+                    'duration': int(duration),
+                    'timezone': str(timezone),
+                    'settings': {
 
-                #{
-                #    'topic': str(topic),
-                #   'type': int(type),
-                #    'start_time': str(start_time),
-                #    'duration': int(duration),
-                    #'schedule_for': self.id,
-                #    'timezone': str(timezone),
-                #    'default_password': 'true',
-                    #'settings': sett
+                        'host_video': False,
+                        'participant_video': participant_video,
+                        'join_before_host': True,
+                        'auto_recording': str(auto_recording)
 
-                #}
+                    }
+                }
 
             )
 
-
+q = Zoom('eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6Imw2aWM3a3dKVEYyQUZqT1ZiVFVyeEEiLCJleHAiOjE2NDY4MjU2NDAsImlhdCI6MTY0MzgwMTc3M30.w6DPCWDILKx-mYdH5vEwCzY47T5K4EipURrn1wrOYpU')
 q.InitUsers()
 print(q.ZoomUsers[3].name)
 print(q.ZoomUsers[3].GetAllConference())
-kek = q.ZoomUsers[3].SetConference('test', 2, '2020-02-11T16:00:00', 120)
-print(kek.status_code, kek.content)
+kek = q.ZoomUsers[3].SetConference('test', 2, '2022-02-14T16:00:00', 120, True, 'cloud')
+print(kek.status_code, kek.json())
+
+print(q.ZoomUsers[3].id, q.ZoomUsers[3].timezone)
 #print(q.GetState()[0], q.GetState()[1])
 
