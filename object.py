@@ -1,7 +1,8 @@
 import requests
 from requests import get
-import json
+from threading import Thread
 #
+
 class Zoom(object):
 
     #URL with users
@@ -13,12 +14,12 @@ class Zoom(object):
     #Init
     def __init__(self, key = 'None'):
         self.key = {'authorization': 'Bearer ' + key}
-        self.ZoomGET = requests.get(self.url_name, headers=self.key)
+        self.ZoomGET = requests.get(self.url_name, headers = self.key)
 
     #Get status
     def GetState(self):
         if int(self.ZoomGET.status_code) == 200:
-            return True
+            return 'True'
         else:
             return [self.ZoomGET.status_code, self.ZoomGET.json()['message']]
 
@@ -78,13 +79,13 @@ class ZoomUser(Zoom):
 
             )
 
-q = Zoom('eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6Imw2aWM3a3dKVEYyQUZqT1ZiVFVyeEEiLCJleHAiOjE2NDY4MjU2NDAsImlhdCI6MTY0MzgwMTc3M30.w6DPCWDILKx-mYdH5vEwCzY47T5K4EipURrn1wrOYpU')
-q.InitUsers()
-print(q.ZoomUsers[3].name)
-print(q.ZoomUsers[3].GetAllConference())
-kek = q.ZoomUsers[3].SetConference('test', 2, '2022-02-14T16:00:00', 120, True, 'cloud')
-print(kek.status_code, kek.json())
 
-print(q.ZoomUsers[3].id, q.ZoomUsers[3].timezone)
+#q.InitUsers()
+#print(q.ZoomUsers[3].name)
+#print(q.ZoomUsers[3].GetAllConference())
+#kek = q.ZoomUsers[3].SetConference('test', 2, '2022-02-14T16:00:00', 120, True, 'cloud')
+#print(kek.status_code, kek.json())
+#print(q.GetState())
+#print(q.ZoomUsers[3].id, q.ZoomUsers[3].timezone)
 #print(q.GetState()[0], q.GetState()[1])
 
