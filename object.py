@@ -3,6 +3,7 @@ from requests import get
 from threading import Thread
 #
 
+
 class Zoom(object):
 
     #URL with users
@@ -29,17 +30,18 @@ class Zoom(object):
             self.ZoomUsers.append(
                 ZoomUser(user['id'],
                           str(user['first_name']) + ' ' + str(user['last_name']),
-                          user['status'], user['timezone'], self.key
+                          user['status'], user['timezone'], user['email'], self.key
                 )
             )
 
 class ZoomUser(Zoom):
     #
-    def __init__(self, id,  name, status, timezone, key):
+    def __init__(self, id,  name, status, timezone, email, key):
         self.id = id
         self.name = name
         self.status = status
         self.timezone = timezone
+        self.email = email
         self.url_name = self.url_name + id + '/' + 'meetings'
         self.key = key
 
