@@ -87,32 +87,45 @@ class UsersWindow(QWidget):
 
     def ViewMainWindow(self):
 
+        j = ''
+
         for user in self.activeZoom.ZoomUsers:
-            if self.item[user.id].isChecked() == False:
-                del self.item[user.id]
+            #j += str(self.item[user.id].text() + ' - ')
+            if self.item[user.id].isChecked() == True:
+                j += str(self.item[user.id].text() + ' - ')
+            else:
+                self.activeZoom.ZoomUsers.remove(user)
 
-        zoomy = self.activeZoom
+        message = QMessageBox()
+        message.setWindowTitle('Error')
+        message.setText(str(j))
+        message.exec()
 
-        self.main_window(zoomy)
+        self.main_window = MainWindow(self.activeZoom)
         self.main_window.show()
 
         self.close()
 
 
-class MainWindow(QMainWindow):
+class MainWindow(QWidget):
     def __init__(self, activeZoom):
-        super.__init__()
+        super().__init__()
 
         self.activeZoom = activeZoom
         self.userInfo = {}
 
         self.gridLayout = QGridLayout()
 
+        i = 0
         for user in self.activeZoom.ZoomUsers:
             self.userInfo[user.id] = [QLabel(user.name), QColumnView()]
-            self.gridLayout.addWidget(userInfo[user.id])
+            self.gridLayout.addWidget(self.userInfo[user.id][0], i, 0)
+            i += 1
+            self.gridLayout.addWidget(self.userInfo[user.id][1], i, 0)
+            i += 1
 
-        self.setCentralWidget(self.gridLayout)
+        self.setLayout(self.gridLayout)
+        #self.setCentralWidget(self.gridLayout)
 
 
 
