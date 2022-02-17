@@ -88,17 +88,24 @@ class UsersWindow(QWidget):
     def ViewMainWindow(self):
 
         j = ''
+        h = ''
 
         for user in self.activeZoom.ZoomUsers:
             #j += str(self.item[user.id].text() + ' - ')
             if self.item[user.id].isChecked() == True:
                 j += str(self.item[user.id].text() + ' - ')
             else:
-                self.activeZoom.ZoomUsers.remove(user)
+                h += str(self.item[user.id].text() + ' - ')
+                #self.activeZoom.ZoomUsers.remove(user)
 
         message = QMessageBox()
         message.setWindowTitle('Error')
         message.setText(str(j))
+        message.exec()
+
+        message = QMessageBox()
+        message.setWindowTitle('Error')
+        message.setText(str(h))
         message.exec()
 
         self.main_window = MainWindow(self.activeZoom)
