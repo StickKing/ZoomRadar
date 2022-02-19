@@ -1,7 +1,8 @@
 from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtWidgets import QApplication, QWidget, QMessageBox, QColumnView, QCheckBox, QLineEdit, QGridLayout, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMainWindow, QLineEdit
+from PyQt6.QtWidgets import QApplication, QWidget, QMessageBox, QColumnView, QTableWidgetItem, QCheckBox, QLineEdit, QGridLayout, QTableWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMainWindow, QLineEdit
 from object import *
 from threading import Thread
+import multiprocessing
 
 #Create application window (Создаю объект окна)
 class StartWindow(QWidget):
@@ -67,15 +68,15 @@ class UsersWindow(QWidget):
 
         label = QLabel('Select accounts to administer')
 
-        grid_layout = QGridLayout()
-        grid_layout.addWidget(label, 0, 0)
+        grid_layout = QVBoxLayout()
+        grid_layout.addWidget(label)
 
-        i = 1
+        height = 20
 
         for user in activeZoom.ZoomUsers:
             self.item[user.id] = QCheckBox(user.name)
-            grid_layout.addWidget(self.item[user.id], i, 0)
-            i += 1
+            grid_layout.addWidget(self.item[user.id])
+            height += 25
 
         self.button = QPushButton('Select users')
         self.button.setFixedHeight(45)
@@ -85,33 +86,31 @@ class UsersWindow(QWidget):
 
         self.setLayout(grid_layout)
 
+        self.setFixedSize(QSize(400, height))
+
     def ViewMainWindow(self):
 
-        j = ''
-        h = ''
+        delList = []
+        items = 0
 
         for user in self.activeZoom.ZoomUsers:
-            #j += str(self.item[user.id].text() + ' - ')
-            if self.item[user.id].isChecked() == True:
-                j += str(self.item[user.id].text() + ' - ')
+            if self.item[user.id].isChecked() == False:
+                delList.append(user)
             else:
-                h += str(self.item[user.id].text() + ' - ')
-                #self.activeZoom.ZoomUsers.remove(user)
+                items += 1
 
-        message = QMessageBox()
-        message.setWindowTitle('Error')
-        message.setText(str(j))
-        message.exec()
+        for user in delList:
+            self.activeZoom.ZoomUsers.remove(user)
 
-        message = QMessageBox()
-        message.setWindowTitle('Error')
-        message.setText(str(h))
-        message.exec()
-
-        self.main_window = MainWindow(self.activeZoom)
-        self.main_window.show()
-
-        self.close()
+        if items == 0:
+            message = QMessageBox()
+            message.setWindowTitle('Warning')
+            message.setText('No element is selected!')
+            message.exec()
+        else:
+            self.main_window = MainWindow(self.activeZoom)
+            self.main_window.show()
+            self.close()
 
 
 class MainWindow(QWidget):
@@ -123,16 +122,66 @@ class MainWindow(QWidget):
 
         self.gridLayout = QGridLayout()
 
-        i = 0
         for user in self.activeZoom.ZoomUsers:
-            self.userInfo[user.id] = [QLabel(user.name), QColumnView()]
-            self.gridLayout.addWidget(self.userInfo[user.id][0], i, 0)
-            i += 1
-            self.gridLayout.addWidget(self.userInfo[user.id][1], i, 0)
-            i += 1
+            th = Thread(target=user.GetAllConference())
+            th.start()
+
+        vertical = 0
+        horizontal = 0
+        for user in self.activeZoom.ZoomUsers:
+            self.userInfo[user.id] = [QLabel(user.name), QTableWidget()]
+
+            rowCount = 1
+            self.userInfo[user.id][1].setRowCount(rowCount)
+
+            self.userInfo[user.id][1].setColumnCount(4)
+
+            self.userInfo[user.id][1].setHorizontalHeaderLabels(['Topic', 'Date', 'Start Time', 'End Time'])
+
+            if user.getResult != 'None':
+                hor = 0
+                ver = 0
+                for meet in user.getResult:
+                    self.userInfo[user.id][1].setItem(ver, hor, QTableWidgetItem(meet['topic']))
+
+                    hor += 1
+                    self.userInfo[user.id][1].setItem(ver, hor, QTableWidgetItem(meet['start_time'].split('T')[0]))
+
+                    start_hour = int(meet['start_time'].split('T')[1].split(':')[0]) + 3
+                    start_minet = meet['start_time'].split(':')[1]
+                    # Час окончания конференции
+                    end_hour = str(start_hour + meet['duration'] // 60)
+                    # Минута окончания конференции
+                    end_minet = str(meet['duration'] % 60 + int(start_minet))
+                    if end_minet == '0':
+                        end_minet = end_minet + '0'
+
+                    hor += 1
+                    self.userInfo[user.id][1].setItem(ver, hor, QTableWidgetItem(str(start_hour) + ':' + meet['start_time'].split(':')[1] ))
+
+                    hor += 1
+                    self.userInfo[user.id][1].setItem(ver, hor, QTableWidgetItem(end_hour + ':' + end_minet))
+
+                    ver += 1
+                    hor = 0
+                    rowCount += 1
+
+                    self.userInfo[user.id][1].setRowCount(rowCount)
+                self.userInfo[user.id][1].resizeColumnsToContents()
+
+
+            self.gridLayout.addWidget(self.userInfo[user.id][0], vertical, horizontal)
+            vertical += 1
+            self.gridLayout.addWidget(self.userInfo[user.id][1], vertical, horizontal)
+
+            if horizontal == 2:
+                horizontal = 0
+                vertical += 1
+            else:
+                horizontal += 1
+                vertical -= 1
 
         self.setLayout(self.gridLayout)
-        #self.setCentralWidget(self.gridLayout)
 
 
 

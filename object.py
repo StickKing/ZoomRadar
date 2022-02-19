@@ -45,13 +45,15 @@ class ZoomUser(Zoom):
         self.url_name = self.url_name + id + '/' + 'meetings'
         self.key = key
 
+        self.getResult = None
+
     #
     def GetAllConference(self, type='upcoming'):
         self.ZoomGET = requests.get(self.url_name, headers=self.key, params={'type': type})
         if str(self.ZoomGET.json()['meetings']) == '[]':
-            return 'None'
+            self.getResult = 'None'
         else:
-            return self.ZoomGET.json()['meetings']
+            self.getResult = self.ZoomGET.json()['meetings']
 
     #Метод создания новой конференции(Create conference function)
     def SetConference(self, topic, type, start_time, duration, participant_video,  auto_recording = 'none', timezone = ''):
